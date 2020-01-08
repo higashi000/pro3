@@ -1,21 +1,33 @@
+from websocket_server import WebsocketServer
 import copy
 import random
 
 class Player:
     hand = []
-    my_id = ""
+    hand_json = ""
+    my_client = ""
     next_user = ""
     previous_user = ""
 
-    def __init__(self, hand, my_id, next_user, previous_user):
+    def __init__(self, hand, my_client, next_user, previous_user):
         self.hand = hand
-        self.my_id = my_id
+        self.my_client = my_client
         self.previous_user = previous_user
         self.next_user = next_user
+        self.hand_delete()
 
     def update_hand(self, card):
         self.hand.append(card)
         self.hand_delete()
+
+    def creat_hand_json(self):
+        self.hand_json = "{\"card\":["
+
+        for i in self.hand:
+            self.hand_json += "\"" + i + "\","
+
+        self.hand_json += "]}"
+
 
     # 手札の重複を確認、捨てる
     def hand_delete(self):
@@ -29,6 +41,8 @@ class Player:
                 new_hand.append(self.hand[i])
 
         self.hand = copy.copy(new_hand)
+        self.creat_hand_json()
+
 
     def draw_card(self, draw_card):
         self.update_hand(draw_card)
@@ -39,6 +53,7 @@ class Player:
 
         drawn_card = self.hand.pop(drawn_card_index)
 
+        self.creat_hand_json()
         return drawn_card
 
     def check_win(self):
