@@ -1,5 +1,6 @@
 from websocket_server import WebsocketServer
 import random
+import json
 import player
 
 users = []
@@ -17,25 +18,33 @@ def separate_card():
     handover_card = [card[0:13], card[13:26], card[26:39], card[39:]]
     random.shuffle(handover_card)
 
-    for i in handover_card:
-        print(len(i))
-
     users.append(player.Player(handover_card[0], client_list[0], client_list[1], client_list[3]))
     users.append(player.Player(handover_card[1], client_list[1], client_list[2], client_list[0]))
     users.append(player.Player(handover_card[2], client_list[2], client_list[3], client_list[1]))
     users.append(player.Player(handover_card[3], client_list[3], client_list[0], client_list[2]))
 
 def game_start(server):
-    now_player = users[0].my_client
+    global now_player
+    now_player = users[0].my_client['id']
 
     for i in users:
         print("{\"status\":\"true\",\"message\":\"game start\"," + i.hand_json + "}")
         server.send_message(i.my_client, "{\"status\":\"true\",\"message\":\"game start\"," + i.hand_json + "}")
 
+
+def check_order(client):
+    print("now_player = %d" % now_player)
+    if client['id'] == now_player:
+        return True
+    else:
+        return False
+
 def update_order():
+    global now_player
     for i in users:
         if i.my_client['id'] == now_player:
             now_player = i.next_user['id']
+            return
 
 def new_client(client, server):
     if len(client_list) < 4:
@@ -52,10 +61,28 @@ def new_client(client, server):
         game_start(server)
 
 def message_received(client, server, message):
-    if len(message) > 200:
-        message = message[:200]+'..'
+    receive_data = json.loads(message)
 
-    print("Client(%d) said: %s" % (client['id'], message))
+    if receive_data["request"] == "draw":
+        print(receive_data)
+        if check_order(client) == True:
+            draw_card(client)
+            update_order()
+        else:
+            server.send_message(client, "{\"status\":\"false\",\"message\":\"There is not it in order of you\"}")
+
+def draw_card(client):
+    for i in users:
+        if i.my_client == client:
+            draw_user = i
+
+    for i in users:
+        if draw_user.next_user == i.my_client:
+            drawn_user = i
+
+    draw_card = drawn_user.drawn_hand()
+    draw_user.draw_card(draw_card)
+
 
 def client_left(client, server):
     print("lient(%d), disconnected" % client['id'])
