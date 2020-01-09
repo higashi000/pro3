@@ -21,12 +21,16 @@ class Player:
         self.hand_delete()
 
     def creat_hand_json(self):
-        self.hand_json = "{\"card\":["
+        self.hand_json = "\"card\":["
 
+        cnt = 0
         for i in self.hand:
-            self.hand_json += "\"" + i + "\","
+            self.hand_json += "\"" + i + "\""
+            if cnt < len(self.hand) - 1:
+                self.hand_json += ','
+            cnt += 1
 
-        self.hand_json += "]}"
+        self.hand_json += "]"
 
 
     # 手札の重複を確認、捨てる
