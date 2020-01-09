@@ -29,7 +29,8 @@ def game_start(server):
     now_player = users[0].my_client
 
     for i in users:
-        server.send_message(i.my_client, i.hand_json)
+        print("{\"status\":\"true\",\"message\":\"game start\"," + i.hand_json + "}")
+        server.send_message(i.my_client, "{\"status\":\"true\",\"message\":\"game start\"," + i.hand_json + "}")
 
 def update_order():
     for i in users:
@@ -39,7 +40,7 @@ def update_order():
 def new_client(client, server):
     if len(client_list) < 4:
         client_list.append(client)
-        server.send_message(client, "aaaa")
+        server.send_message(client, "{\"status\":\"true\",\"message\":\"successful connect\"}")
         print("Join new user")
     else:
         print("over capacity")
