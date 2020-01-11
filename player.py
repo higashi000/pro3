@@ -37,16 +37,25 @@ class Player:
 
     # 手札の重複を確認、捨てる
     def hand_delete(self):
+        after_delete = []
         self.hand.sort()
-        new_hand = []
 
-        for i in range(0, len(self.hand) - 1):
-            first_hand = self.hand[i]
-            second_hand = self.hand[i + 1]
-            if first_hand[:2] != second_hand[:2]:
-                new_hand.append(self.hand[i])
+        while True:
+            if self.hand[0][:2] != self.hand[1][:2]:
+                after_delete.append(self.hand.pop(0))
+            else:
+                self.hand.pop(0)
+                self.hand.pop(0)
 
-        self.hand = copy.copy(new_hand)
+            if len(self.hand) == 0:
+                break
+
+            if len(self.hand) == 1:
+                after_delete.append(self.hand.pop(0))
+                break
+
+        self.hand = copy.copy(after_delete)
+
         if len(self.hand) != 0:
             self.create_hand_json()
         else:

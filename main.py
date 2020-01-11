@@ -67,7 +67,6 @@ def message_received(client, server, message):
         print(receive_data)
         if check_order(client) == True:
             draw_card(server, client)
-            update_order()
         else:
             server.send_message(client, "{\"status\":\"false\",\"message\":\"There is not it in order of you\"}")
 
@@ -111,6 +110,8 @@ def send_result(server, draw_client, drawn_client):
     for i in users:
         print("Client[%d] previous -> %d, next -> %d" % (i.my_client['id'], i.previous_user['id'], i.next_user['id']))
 
+    update_order()
+
 def draw_card(server, client):
     for i in users:
         if i.my_client == client:
@@ -121,7 +122,7 @@ def draw_card(server, client):
             drawn_user = i
 
     draw_card = drawn_user.drawn_hand()
-    draw_user.draw_card(draw_card)
+    draw_user.update_hand(draw_card)
 
     send_result(server, draw_user, drawn_user)
 
