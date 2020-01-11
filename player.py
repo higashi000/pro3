@@ -22,7 +22,7 @@ class Player:
         self.hand_delete()
 
     # 手札のjson文字列作成
-    def creat_hand_json(self):
+    def create_hand_json(self):
         self.hand_json = "\"card\":["
 
         cnt = 0
@@ -47,7 +47,10 @@ class Player:
                 new_hand.append(self.hand[i])
 
         self.hand = copy.copy(new_hand)
-        self.creat_hand_json()
+        if len(self.hand) != 0:
+            self.create_hand_json()
+        else:
+            self.hand_json = "\"card\":\"nothing\""
 
 
     # カードを引く
@@ -60,7 +63,10 @@ class Player:
 
         drawn_card = self.hand.pop(drawn_card_index)
 
-        self.creat_hand_json()
+        if len(self.hand) != 0:
+            self.create_hand_json()
+        else:
+            self.hand_json = "\"card\":\"nothing\""
         return drawn_card
 
     def check_win(self):
