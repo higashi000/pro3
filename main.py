@@ -25,7 +25,7 @@ def separate_card():
 
 def game_start(server):
     global now_player
-    now_player = users[0].my_client['id']
+    now_player = users[0].my_client
 
     for i in users:
         print("{\"status\":\"true\",\"message\":\"game start\"," + i.hand_json + "}")
@@ -33,8 +33,7 @@ def game_start(server):
 
 
 def check_order(client):
-    print("now_player = %d" % now_player)
-    if client['id'] == now_player:
+    if client == now_player:
         return True
     else:
         return False
@@ -42,8 +41,8 @@ def check_order(client):
 def update_order():
     global now_player
     for i in users:
-        if i.my_client['id'] == now_player:
-            now_player = i.next_user['id']
+        if i.my_client == now_player:
+            now_player = i.next_user
             return
 
 def new_client(client, server):
@@ -66,12 +65,16 @@ def message_received(client, server, message):
     if receive_data["request"] == "draw":
         print(receive_data)
         if check_order(client) == True:
-            draw_card(client)
+            draw_card(server, client)
             update_order()
         else:
             server.send_message(client, "{\"status\":\"false\",\"message\":\"There is not it in order of you\"}")
 
-def draw_card(client):
+def send_draw_result(server, draw_client, drawn_client):
+    server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + draw_client.hand_json + "}")
+    server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + drawn_client.hand_json + "}")
+
+def draw_card(server, client):
     for i in users:
         if i.my_client == client:
             draw_user = i
@@ -82,6 +85,8 @@ def draw_card(client):
 
     draw_card = drawn_user.drawn_hand()
     draw_user.draw_card(draw_card)
+
+    send_draw_result(server, draw_user, drawn_user)
 
 
 def client_left(client, server):
