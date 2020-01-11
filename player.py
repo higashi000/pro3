@@ -16,10 +16,12 @@ class Player:
         self.next_user = next_user
         self.hand_delete()
 
+    # 手札アップデート
     def update_hand(self, card):
         self.hand.append(card)
         self.hand_delete()
 
+    # 手札のjson文字列作成
     def creat_hand_json(self):
         self.hand_json = "\"card\":["
 
@@ -48,6 +50,7 @@ class Player:
         self.creat_hand_json()
 
 
+    # カードを引く
     def draw_card(self, draw_card):
         self.update_hand(draw_card)
 
