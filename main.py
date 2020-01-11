@@ -4,6 +4,7 @@ import json
 import player
 
 users = []
+win_user = []
 client_list = []
 now_player = ""
 
@@ -70,9 +71,45 @@ def message_received(client, server, message):
         else:
             server.send_message(client, "{\"status\":\"false\",\"message\":\"There is not it in order of you\"}")
 
-def send_draw_result(server, draw_client, drawn_client):
-    server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + draw_client.hand_json + "}")
-    server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + drawn_client.hand_json + "}")
+
+# 勝ちならそのユーザーを順番から除外する
+def check_win(user):
+    global users
+    win = False
+    if user.check_win():
+        win = True
+        for i in range(len(users)):
+            if users[i].my_client == user.previous_user:
+                users[i].next_user = user.next_user
+                break
+        for i in range(len(users)):
+            if users[i].my_client == user.next_user:
+                users[i].previous_user = user.previous_user
+                break
+
+        for i in range(len(users)):
+            if users[i] == user:
+                print(users[i].my_client['id'])
+                print(user.my_client['id'])
+                win_user.append(users.pop(i))
+                break
+
+    return win
+
+# カードを引いた結果をクライアントに渡す
+def send_result(server, draw_client, drawn_client):
+    if check_win(drawn_client):
+        server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"You win\"}")
+    else:
+        server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + drawn_client.hand_json + "}")
+
+    if check_win(draw_client):
+        server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"You win\"}")
+    else:
+        server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + draw_client.hand_json + "}")
+
+    for i in users:
+        print("Client[%d] previous -> %d, next -> %d" % (i.my_client['id'], i.previous_user['id'], i.next_user['id']))
 
 def draw_card(server, client):
     for i in users:
@@ -86,7 +123,7 @@ def draw_card(server, client):
     draw_card = drawn_user.drawn_hand()
     draw_user.draw_card(draw_card)
 
-    send_draw_result(server, draw_user, drawn_user)
+    send_result(server, draw_user, drawn_user)
 
 
 def client_left(client, server):
