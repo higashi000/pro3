@@ -48,7 +48,7 @@ def update_order():
 def new_client(client, server):
     if len(client_list) < 4:
         client_list.append(client)
-        server.send_message(client, "{\"status\":\"true\",\"message\":\"successful connect\"}")
+        server.send_message(client, "{\"status\":\"true\",\"message\":\"successful connect\",\"id\":\"" + str(client['id']) + "\"}")
         print("Join new user")
     else:
         print("over capacity")
