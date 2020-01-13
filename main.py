@@ -4,7 +4,7 @@ import json
 import player
 
 users = []
-win_user = []
+finish_user = []
 client_list = []
 now_player = ""
 
@@ -74,6 +74,7 @@ def message_received(client, server, message):
 # 勝ちならそのユーザーを順番から除外する
 def check_win(user):
     global users
+    global finish_user
     win = False
     if user.check_win():
         win = True
@@ -90,13 +91,28 @@ def check_win(user):
             if users[i] == user:
                 print(users[i].my_client['id'])
                 print(user.my_client['id'])
-                win_user.append(users.pop(i))
+                finish_user.append(users.pop(i))
                 break
 
     return win
 
 # カードを引いた結果をクライアントに渡す
 def send_result(server, draw_client, drawn_client):
+    global finish_user
+    if len(users) == 1:
+        finish_user.append(users.pop(0))
+
+        rankingStr = "[" + str(finish_user[0].my_client['id']) + "," + str(finish_user[1].my_client['id']) + "," + str(finish_user[2].my_client['id']) + "," + str(finish_user[3].my_client['id']) + "]"
+
+        for i in range(len(finish_user)):
+            server.send_message(finish_user[i].my_client, "{\
+                                                                \"status\":\"true\",\
+                                                                \"message\":\"game finish\",\
+                                                                \"rank\":\"" + str(i + 1) + "\",\
+                                                                \"ranking\":" + rankingStr + "\
+                                                            }")
+            return
+
     if check_win(drawn_client):
         server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"You win\"}")
     else:
