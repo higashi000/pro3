@@ -6,6 +6,7 @@ import player
 users = []
 finish_user = []
 client_list = []
+rank_cnt = 1
 now_player = ""
 
 card = ["01a", "02a", "03a", "04a", "05a", "06a", "07a", "08a", "09a", "10a", "11a", "12a", "13a",
@@ -89,9 +90,7 @@ def check_win(user):
 
         for i in range(len(users)):
             if users[i] == user:
-                print(users[i].my_client['id'])
-                print(user.my_client['id'])
-                finish_user.append(users.pop(i))
+                finish_user.append(users[i])
                 break
 
     return win
@@ -99,19 +98,6 @@ def check_win(user):
 # カードを引いた結果をクライアントに渡す
 def send_result(server, draw_client, drawn_client):
     global finish_user
-    if len(users) == 1:
-        finish_user.append(users.pop(0))
-
-        rankingStr = "[" + str(finish_user[0].my_client['id']) + "," + str(finish_user[1].my_client['id']) + "," + str(finish_user[2].my_client['id']) + "," + str(finish_user[3].my_client['id']) + "]"
-
-        for i in range(len(finish_user)):
-            server.send_message(finish_user[i].my_client, "{\
-                                                                \"status\":\"true\",\
-                                                                \"message\":\"game finish\",\
-                                                                \"rank\":\"" + str(i + 1) + "\",\
-                                                                \"ranking\":" + rankingStr + "\
-                                                            }")
-            return
 
     if check_win(drawn_client):
         server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"You win\"}")
@@ -123,8 +109,28 @@ def send_result(server, draw_client, drawn_client):
     else:
         server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + draw_client.hand_json + "}")
 
-    for i in users:
-        print("Client[%d] previous -> %d, next -> %d" % (i.my_client['id'], i.previous_user['id'], i.next_user['id']))
+    if len(finish_user) == 3:
+        for i in users:
+            for j in finish_user:
+                if i.my_client['id'] == j.my_client['id']:
+                    continue
+            finish_user.append(i)
+            break
+
+        for i in range(len(finish_user)):
+            print("rank %d : %d" % (i + 1, finish_user[i].my_client['id']))
+
+        rankingStr = "[" + str(finish_user[0].my_client['id']) + "," + str(finish_user[1].my_client['id']) + "," + str(finish_user[2].my_client['id']) + "," + str(finish_user[3].my_client['id']) + "]"
+
+        server.send_message_to_all("{\
+                                        \"status\":\"true\",\
+                                        \"message\":\"game finish\",\
+                                        \"ranking\":" + rankingStr + "\
+                                    }")
+        return
+
+#    for i in users:
+#        print("Client[%d] previous -> %d, next -> %d" % (i.my_client['id'], i.previous_user['id'], i.next_user['id']))
 
     update_order()
 

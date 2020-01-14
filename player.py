@@ -7,6 +7,7 @@ class Player:
     hand_json = ""
     my_client = ""
     next_user = ""
+    rank = ""
     previous_user = ""
 
     def __init__(self, hand, my_client, next_user, previous_user):
@@ -15,6 +16,9 @@ class Player:
         self.previous_user = previous_user
         self.next_user = next_user
         self.hand_delete()
+
+    def setRank(self, rank):
+        self.rank = rank
 
     # 手札アップデート
     def update_hand(self, card):
