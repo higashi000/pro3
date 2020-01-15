@@ -96,18 +96,18 @@ def check_win(user):
     return win
 
 # カードを引いた結果をクライアントに渡す
-def send_result(server, draw_client, drawn_client):
+def send_result(server, draw_client, drawn_client, card):
     global finish_user
 
     if check_win(drawn_client):
-        server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"You win\"}")
+        server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"You win\",\"draw_card\":\"" + card + "\"}")
     else:
-        server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + drawn_client.hand_json + "}")
+        server.send_message(drawn_client.my_client, "{\"status\":\"true\",\"message\":\"drawn card\"," + drawn_client.hand_json + ",\"draw_card\":\"" + card +"\"}")
 
     if check_win(draw_client):
-        server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"You win\"}")
+        server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"You win\",\"draw_card\":\"" + card + "\"}")
     else:
-        server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + draw_client.hand_json + "}")
+        server.send_message(draw_client.my_client, "{\"status\":\"true\",\"message\":\"draw card\"," + draw_client.hand_json + ",\"draw_card\":\"" + card +"\"}")
 
     if len(finish_user) == 3:
         for i in users:
@@ -129,9 +129,6 @@ def send_result(server, draw_client, drawn_client):
                                     }")
         return
 
-#    for i in users:
-#        print("Client[%d] previous -> %d, next -> %d" % (i.my_client['id'], i.previous_user['id'], i.next_user['id']))
-
     update_order()
 
 def draw_card(server, client):
@@ -146,7 +143,7 @@ def draw_card(server, client):
     draw_card = drawn_user.drawn_hand()
     draw_user.update_hand(draw_card)
 
-    send_result(server, draw_user, drawn_user)
+    send_result(server, draw_user, drawn_user, draw_card)
 
 
 def client_left(client, server):
